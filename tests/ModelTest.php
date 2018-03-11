@@ -20,12 +20,14 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 $sql = <<<SQL
 CREATE TABLE Client (idClient INT, nom TEXT, idVille INT);
 CREATE TABLE Ville (idVille INT, ville TEXT, population INT);
+INSERT INTO Ville VALUES (0, 'NO MAN S LAND', 0);
 INSERT INTO Ville VALUES (1, 'PARIS', 1000000);
 INSERT INTO Ville VALUES (2, 'LYON', 500000);
 INSERT INTO Client VALUES (1, 'Dupont', 1);
 INSERT INTO Client VALUES (2, 'Durand', 2);
 INSERT INTO Client VALUES (3, 'Dumont', 3);
 INSERT INTO Client VALUES (4, 'Dumas', NULL);
+INSERT INTO Client VALUES (5, 'Dumat', 0);
 SQL;
 
         $this->_pdo->exec($sql);
@@ -52,14 +54,17 @@ SQL;
         $this->assertEquals(1, $g->getClient(1)->Ville__idVille);
 
         // testing getting rows for non-existing primary keys
-        $this->assertEquals(FALSE, $g->getClient(5));
-        $this->assertEquals(FALSE, $g->getVille(5));
+        $this->assertEquals(FALSE, $g->getClient(999));
+        $this->assertEquals(FALSE, $g->getVille(999));
         
         // asserting the MyORM\Client class is used
         $this->assertInstanceOf(\MyORM\Client::class, $g->getClient(2));
         
         $this->assertEquals('Dumas', $g->getClient(4)->nom);
         $this->assertEquals(NULL, $g->getClient(4)->idVille);
+        
+        // asserting that a foreign key with value 0 is fetched (difference between 0 and NULL)
+        $this->assertEquals('NO MAN S LAND', $g->getClient(5)->Ville__ville);
     }
 
 

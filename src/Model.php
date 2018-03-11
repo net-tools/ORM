@@ -126,7 +126,7 @@ class Model {
      */
     protected function _getForeignKey(ModelObject $obj, $fktable, $fkid)
     {
-        if ( $fkid )
+        if ( !is_null($fkid) )
         {
             // get foreign key row
             $fkobj = $this->_getTableRow($fktable, $fkid);
