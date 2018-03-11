@@ -17,5 +17,15 @@
 		"psr-4": {
 			"Nettools\\ORM\\": "src/"
 		}
-    }
+    },
+    
+    "license" : "MIT",
+
+    "authors": [
+        {
+            "name": "Pierre",
+            "email": "dev@net-tools.ovh",
+            "role": "Developer"
+        }
+    ]
 }
