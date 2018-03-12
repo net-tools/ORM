@@ -112,6 +112,34 @@ class Model {
     
     
     /**
+     * Get table rows matching a set of column values
+     * 
+     * @param string $table
+     * @param array $where
+     * @return \stdClass[]
+     * @throws \Exception
+     */
+    protected function _selectTableRows($table, array $where = [])
+    {
+		// preparing where clause
+		$sql = [];
+		foreach ( $where as $column => $value )
+			$sql[] = "`$column` = ?";
+		
+        // get PDOStatement
+        $pdo_st = $this->_pdo->prepare("SELECT * FROM `$table` WHERE " . implode(' AND ', $sql));
+
+        // exec prepared request with parameter
+        if ( !$pdo_st->execute(array_values($where)) )
+            throw new \Exception("SQL error during request on table '$table'.");
+        
+        // returning row or FALSE if not found
+        return $pdo_st->fetchAll(\PDO::FETCH_OBJ);
+    }
+    
+    
+    
+    /**
      * Get a row which is a foreign key for a given ModelObject.
      * 
      * Foreign row columns are set as properties of $obj prefixed with foreign table. For example,
@@ -141,16 +169,15 @@ class Model {
     
     
     /**
-     * Get a table row identified by its primary key and return an ORM layer object
+     * Get a table row as an ORM layer object
      * 
+	 * @param \stdClass|bool $o
      * @param string $table
-     * @param string|int $id
      * @return \Nettools\ORM\ModelObject|FALSE
      * @throws \Exception
      */
-    protected function _getObjectRow($table, $id)
+    protected function _getObjectRow($o, $table)
     {
-        $o = $this->_getTableRow($table, $id);
         if ( $o )
         {
             // does an object exist user-side for $table ?
@@ -168,6 +195,29 @@ class Model {
         else
             return false;
     }
+	
+	
+	
+	/** 
+	 * Exec a SQL request
+	 *
+	 * @param string $sql Request in SQL language ; parameters for prepared requests are allowed
+	 * @param string[] $sqlparameters Prepared request parameters
+	 * @return \Nettools\ORM\ModelObject[]
+	 */
+	public function query($sql, array $sqlparameters = [])
+	{
+        // get PDOStatement
+        $pdo_st = $this->_pdo->prepare($sql);
+
+        // exec prepared request with parameter
+        if ( !$pdo_st->execute($sqlparameters) )
+            throw new \Exception("SQL error during request '$sql'.");
+        
+        // returning row or FALSE if not found
+        $rows = $pdo_st->fetchAll(\PDO::FETCH_OBJ);
+		return array_map(function($row){return new ModelObject($row);}, $rows);
+	}
     
     
     
@@ -183,14 +233,18 @@ class Model {
      */
     public function __call($m, $args)
     {
-        // if method call starts with 'get', we are looking for a table registered named along with string following 'get' prefix
+        // if method call starts with 'get', we are looking for a table named with string following 'get' prefix
+		// we are selecting the row with the primary key given as argument
         if ( strpos($m, 'get') === 0 )
         {
+			if ( is_null($args[0]) )
+				throw new \Exception("Primary key value has not been defined for 'get$table' call.");
+				
             $table = substr($m, 3);
             if ( array_key_exists($table, $this->_pdoStatementCache) )
             {
                 // fetch ORM object
-                $o = $this->_getObjectRow($table, $args[0]);
+                $o = $this->_getObjectRow($this->_getTableRow($table, $args[0]), $table);
                 
                 // if row exists
                 if ( $o )
@@ -204,7 +258,40 @@ class Model {
             else
                 throw new \Exception("Table '$table' has not been registered ; 'get$table' call failed.");
         }
-        else
+		
+		
+        // if method call starts with 'select', we are looking for a table named with string following 'select' prefix
+		// we are selecting the rows with the columns values given as argument
+        else if ( strpos($m, 'select') === 0 )
+		{
+            $table = substr($m, 6);
+			
+			if ( !is_array($args[0]) )
+				throw new \Exception("Where clause as associative array has not been defined for 'select$table' call.");
+			
+			// fetch rows
+			$rows = $this->_selectTableRows($table, $args[0]);
+
+			// if row exists
+			$ret = [];
+			foreach ( $rows as $row )
+			{
+				// converting stdClass object from PDO to ORM object
+				$o = $this->_getObjectRow($row, $table);
+				
+				// handle foreign keys
+				if ( $this->_foreignKeysMap[$table] )
+					foreach ( $this->_foreignKeysMap[$table] as $fk )
+						$this->_getForeignKey($o, $fk, $o->{'id' . $fk});
+				
+				
+				$ret[] = $o;
+			}
+
+			return $ret;
+		}
+		else
+			
             throw new \Exception("Method '$m' does not exist.");
     }
 }

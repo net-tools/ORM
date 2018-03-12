@@ -43,6 +43,23 @@ class ModelObject {
         
         return $this;
     }
+	
+	
+	
+    /**
+     * Accessor
+     *
+     * @param string $k
+     * @return mixed
+     * @throws \Exception
+     */
+	public function get($k)
+	{
+        if ( !property_exists($this->_o, $k) )
+            throw new \Exception("Property '$k' does not exist in class '" . get_class($this) ."'");
+        
+        return $this->_o->{$k};
+	}
     
     
     
@@ -55,10 +72,7 @@ class ModelObject {
      */
     public function __get($k)
     {
-        if ( !property_exists($this->_o, $k) )
-            throw new \Exception("Property '$k' does not exist in class '" . get_class($this) ."'");
-        
-        return $this->_o->{$k};
+		return $this->get($k);
     }
 }
 
