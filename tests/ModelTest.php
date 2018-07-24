@@ -73,6 +73,11 @@ SQL;
 		$this->assertEquals('PARIS', $select[0]->town);
 		$this->assertEquals('LYON', $select[1]->town);
 				
+		// testing select no where
+		$select = $g->selectTown();
+		$this->assertEquals('array', gettype($select));
+		$this->assertEquals(3, count($select));
+				
 		// test query
 		$rows = $g->query('SELECT * FROM Client, Town WHERE Client.idTown = Town.idTown AND Client.idClient = ?', [1]);
 		$this->assertEquals('array', gettype($rows));

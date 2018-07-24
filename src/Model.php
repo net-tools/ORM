@@ -123,9 +123,13 @@ class Model {
     {
 		// preparing where clause
 		$sql = [];
-		foreach ( $where as $column => $value )
-			$sql[] = "`$column` = ?";
 		
+		if ( count($where) )
+			foreach ( $where as $column => $value )
+				$sql[] = "`$column` = ?";
+		else
+			$sql[] = '1=1';
+
         // get PDOStatement
         $pdo_st = $this->_pdo->prepare("SELECT * FROM `$table` WHERE " . implode(' AND ', $sql));
 
