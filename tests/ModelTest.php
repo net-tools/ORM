@@ -74,7 +74,7 @@ SQL;
 		$this->assertEquals('LYON', $select[1]->town);
 				
 		// testing select no where
-		$select = $g->selectTown();
+		$select = $g->selectTown([]);
 		$this->assertEquals('array', gettype($select));
 		$this->assertEquals(3, count($select));
 				
