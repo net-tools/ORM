@@ -11,7 +11,7 @@ class ModelTest extends \PHPUnit\Framework\TestCase
 
 
 
-    public function setUp()
+    public function setUp() :void
     {
         $this->_db = '/tmp/' . __CLASS__ . uniqid() . '.sqlite3';
         $this->_pdo = new \PDO('sqlite:' . $this->_db);
@@ -35,7 +35,7 @@ SQL;
 
 
 
-    public function tearDown()
+    public function tearDown() :void
     {
         $this->_pdo = NULL;
         unlink($this->_db);
@@ -90,48 +90,49 @@ SQL;
 
 
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Property 'notexistingproperty' does not exist in class 
-     */
     public function testGatewayExceptionProperty()
     {
+        $this->expectException(\Exception::class);
+		$this->expectExceptionMessage("Property 'notexistingproperty' does not exist in class");
+		
+		
         $g = new TestGateway($this->_pdo);
         $g->getTown(2)->notexistingproperty;
     }
 
 
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Foreign key row of 'Town' with primary key '3' does not exist.
-     */
     public function testGatewayExceptionFK()
     {
+        $this->expectException(\Exception::class);
+		$this->expectExceptionMessage("Foreign key row of 'Town' with primary key '3' does not exist.");
+		
+		
         $g = new TestGateway($this->_pdo);
         $g->getClient(3)->Town__town;
     }
 
 
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Table 'Invoice' has not been registered ; 'getInvoice' call failed.
-     */
     public function testGatewayInexistantTable()
     {
+        $this->expectException(\Exception::class);
+		$this->expectExceptionMessage("Table 'Invoice' has not been registered ; 'getInvoice' call failed.");
+		
+		
         $g = new TestGateway($this->_pdo);
         $g->getInvoice(2);
     }
 
 
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Method 'nomethod' does not exist.
-     */
     public function testGatewayInexistantMethod()
     {
+        $this->expectException(\Exception::class);
+	    $this->expectExceptionMessage("Method 'nomethod' does not exist.");
+
+		
+		
         $g = new TestGateway($this->_pdo);
         $g->nomethod();
     }

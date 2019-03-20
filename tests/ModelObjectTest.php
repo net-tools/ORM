@@ -52,11 +52,11 @@ class ModelObjectTest extends \PHPUnit\Framework\TestCase
     
 
     
-    /**
-     * @expectedException \Exception
-     */
     public function testObjectException()
     {
+        $this->expectException(\Exception::class);
+		
+		
 		$o = new \Nettools\ORM\ModelObject((object)[]);
         $o->prop;
     }
