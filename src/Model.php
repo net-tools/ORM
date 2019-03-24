@@ -241,10 +241,11 @@ class Model {
 		// we are selecting the row with the primary key given as argument
         if ( strpos($m, 'get') === 0 )
         {
-			if ( is_null($args[0]) )
+            $table = substr($m, 3);
+            
+            if ( is_null($args[0]) )
 				throw new \Exception("Primary key value has not been defined for 'get$table' call.");
 				
-            $table = substr($m, 3);
             if ( array_key_exists($table, $this->_pdoStatementCache) )
             {
                 // fetch ORM object
