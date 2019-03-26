@@ -125,8 +125,11 @@ class Model {
 		$sql = [];
 		
 		if ( count($where) )
-			foreach ( $where as $column => $value )
+		{
+		    $columns = array_keys($where);
+			foreach ( $columns as $column )
 				$sql[] = "`$column` = ?";
+		}
 		else
 			$sql[] = '1=1';
 
