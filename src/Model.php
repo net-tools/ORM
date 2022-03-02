@@ -60,7 +60,7 @@ class Model {
      * @param string[] Tables to register with the ORM
      * @param array Map of foreign keys for tables (associative array table_name => ['fktable1', 'fktable2'])
 	 */
-	public function __construct(\PDO $pdo, $userns = NULL, array $tables, array $foreignKeys = [])
+	public function __construct(\PDO $pdo, $userns = NULL, array $tables = [], array $foreignKeys = [])
 	{
 		$this->_pdo = $pdo;
         $this->_userns = $userns;
