@@ -42,7 +42,8 @@ class Model {
      */
     protected function _getPDOStatement($table)
     {
-        $pdost = $this->_pdoStatementCache[$table];
+        $pdost = array_key_exists($table, $this->_pdoStatementCache) ? $this->_pdoStatementCache[$table] : null;
+		
         if ( !$pdost )
             throw new \Exception("PDOStatement for table '$table' has not been prepared.");
         
@@ -257,7 +258,7 @@ class Model {
                 // if row exists
                 if ( $o )
                     // handle foreign keys
-                    if ( $this->_foreignKeysMap[$table] )
+                    if ( array_key_exists($table, $this->_foreignKeysMap) )
                         foreach ( $this->_foreignKeysMap[$table] as $fk )
                             $this->_getForeignKey($o, $fk, $o->{'id' . $fk});
                 
@@ -288,7 +289,7 @@ class Model {
 				$o = $this->_getObjectRow($row, $table);
 				
 				// handle foreign keys
-				if ( $this->_foreignKeysMap[$table] )
+				if ( array_key_exists($table, $this->_foreignKeysMap) )
 					foreach ( $this->_foreignKeysMap[$table] as $fk )
 						$this->_getForeignKey($o, $fk, $o->{'id' . $fk});
 				
